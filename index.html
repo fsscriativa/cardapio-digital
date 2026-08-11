@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cardápio Digital</title>
+  <style>
+    :root {
+      --primary-color: #d9381e;
+      --bg-color: #f8f9fa;
+      --card-bg: #ffffff;
+      --text-color: #2b2b2b;
+      --accent-color: #27ae60;
+      --border-radius: 12px;
+      --box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    body {
+      background-color: var(--bg-color);
+      color: var(--text-color);
+      padding: 20px;
+    }
+
+    header {
+      text-align: center;
+      margin-bottom: 30px;
+      padding: 20px 0;
+    }
+
+    header h1 {
+      font-size: 2.2rem;
+      color: var(--primary-color);
+      margin-bottom: 8px;
+    }
+
+    header p {
+      color: #666;
+    }
+
+    .container {
+      max-width: 1000px;
+      margin: 0 auto;
+    }
+
+    #loading {
+      text-align: center;
+      font-size: 1.2rem;
+      color: #666;
+      padding: 40px;
+    }
+
+    .category-section {
+      margin-bottom: 35px;
+    }
+
+    .category-title {
+      font-size: 1.5rem;
+      color: var(--primary-color);
+      border-bottom: 2px solid var(--primary-color);
+      padding-bottom: 6px;
+      margin-bottom: 16px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .menu-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 16px;
+    }
+
+    .menu-card {
+      background-color: var(--card-bg);
+      border-radius: var(--border-radius);
+      padding: 16px;
+      box-shadow: var(--box-shadow);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .menu-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 16px rgba(0,0,0,0.12);
+    }
+
+    .item-details {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .item-detail-text {
+      font-size: 1.1rem;
+      font-weight: 600;
+      color: var(--text-color);
+    }
+
+    .item-price {
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: var(--accent-color);
+      background-color: #eafaf1;
+      padding: 6px 12px;
+      border-radius: 20px;
+      white-space: nowrap;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <header>
+      <h1>Nosso Cardápio</h1>
+      <p>Confira nossos produtos e preços atualizados</p>
+    </header>
+
+    <div id="loading">Carregando cardápio...</div>
+    <main id="app"></main>
+  </div>
+
+  <script>
+    // URL gerada na implantação do Google Apps Script
+    const API_URL = "https://script.google.com/macros/s/AKfycbz--MWtYgG23Kzd5q3DwocWIqpMaNRaAee27sm7hg8cRo_WFlJ-hkxRwC_nWWZlsGVp/exec";
+
+    async function loadMenu() {
+      const loadingEl = document.getElementById('loading');
+      const appEl = document.getElementById('app');
+
+      try {
+        const response = await fetch(API_URL);
+        const data = await response.json();
+
+        loadingEl.style.display = 'none';
+
+        if (data.status === 'error') {
+          appEl.innerHTML = `<p style="text-align:center; color:red;">${data.message}</p>`;
+          return;
+        }
+
+        // Agrupar itens por Categoria
+        const groupedData = data.reduce((acc, item) => {
+          const cat = item.categoria || 'OUTROS';
+          if (!acc[cat]) acc[cat] = [];
+          acc[cat].push(item);
+          return acc;
+        }, {});
+
+        // Renderizar Categorias e Cards
+        for (const [categoria, items] of Object.entries(groupedData)) {
+          const section = document.createElement('section');
+          section.className = 'category-section';
+
+          const title = document.createElement('h2');
+          title.className = 'category-title';
+          title.textContent = categoria;
+          section.appendChild(title);
+
+          const grid = document.createElement('div');
+          grid.className = 'menu-grid';
+
+          items.forEach(item => {
+            const card = document.createElement('div');
+            card.className = 'menu-card';
+
+            const detailText = item.detalhamento && item.detalhamento !== '—' 
+              ? item.detalhamento 
+              : categoria;
+
+            // Formatação do Preço
+            let formattedPrice = item.preco;
+            if (typeof item.preco === 'number') {
+              formattedPrice = item.preco.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+            }
+
+            card.innerHTML = `
+              <div class="item-details">
+                <span class="item-detail-text">${detailText}</span>
+              </div>
+              <div class="item-price">${formattedPrice}</div>
+            `;
+
+            grid.appendChild(card);
+          });
+
+          section.appendChild(grid);
+          appEl.appendChild(section);
+        }
+
+      } catch (error) {
+        console.error("Erro ao carregar cardápio:", error);
+        loadingEl.innerHTML = "<p style='color:red;'>Erro ao carregar o cardápio. Verifique a URL do Script.</p>";
+      }
+    }
+
+    loadMenu();
+  </script>
+</body>
+</html>
