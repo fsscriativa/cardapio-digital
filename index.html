@@ -1,206 +1,746 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Cardápio Digital</title>
-  <style>
-    :root {
-      --primary-color: #d9381e;
-      --bg-color: #f8f9fa;
-      --card-bg: #ffffff;
-      --text-color: #2b2b2b;
-      --accent-color: #27ae60;
-      --border-radius: 12px;
-      --box-shadow: 0 4px 12px rgba(0,0,0,0.08);
-    }
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Delivery de Sorvetes - Alagoas</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
 
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+            background: #f0f2f5;
+            padding: 0;
+            max-width: 600px;
+            margin: 0 auto;
+            min-height: 100vh;
+            padding-bottom: 80px;
+        }
 
-    body {
-      background-color: var(--bg-color);
-      color: var(--text-color);
-      padding: 20px;
-    }
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 25px 20px;
+            margin-bottom: 20px;
+            text-align: center;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
 
-    header {
-      text-align: center;
-      margin-bottom: 30px;
-      padding: 20px 0;
-    }
+        .header h1 {
+            font-size: 28px;
+            margin-bottom: 8px;
+        }
 
-    header h1 {
-      font-size: 2.2rem;
-      color: var(--primary-color);
-      margin-bottom: 8px;
-    }
+        .header p {
+            font-size: 14px;
+            opacity: 0.95;
+        }
 
-    header p {
-      color: #666;
-    }
+        .search-bar {
+            margin: 0 20px 20px 20px;
+            position: relative;
+        }
 
-    .container {
-      max-width: 1000px;
-      margin: 0 auto;
-    }
+        .search-bar input {
+            width: 100%;
+            padding: 12px 15px 12px 40px;
+            border: none;
+            border-radius: 25px;
+            font-size: 16px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            outline: none;
+        }
 
-    #loading {
-      text-align: center;
-      font-size: 1.2rem;
-      color: #666;
-      padding: 40px;
-    }
+        .search-bar::before {
+            content: "🔍";
+            position: absolute;
+            left: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 18px;
+        }
 
-    .category-section {
-      margin-bottom: 35px;
-    }
+        .category {
+            margin-bottom: 25px;
+            padding: 0 20px;
+        }
 
-    .category-title {
-      font-size: 1.5rem;
-      color: var(--primary-color);
-      border-bottom: 2px solid var(--primary-color);
-      padding-bottom: 6px;
-      margin-bottom: 16px;
-      text-transform: uppercase;
-      letter-spacing: 1px;
-    }
+        .category-title {
+            background: white;
+            padding: 15px 20px;
+            border-radius: 10px;
+            margin-bottom: 10px;
+            font-weight: bold;
+            font-size: 18px;
+            color: #333;
+            border-left: 5px solid #667eea;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
 
-    .menu-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-      gap: 16px;
-    }
+        .item {
+            background: white;
+            padding: 15px 20px;
+            margin-bottom: 8px;
+            border-radius: 10px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
 
-    .menu-card {
-      background-color: var(--card-bg);
-      border-radius: var(--border-radius);
-      padding: 16px;
-      box-shadow: var(--box-shadow);
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      transition: transform 0.2s ease, box-shadow 0.2s ease;
-    }
+        .item:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(0,0,0,0.1);
+        }
 
-    .menu-card:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 6px 16px rgba(0,0,0,0.12);
-    }
+        .item-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 5px;
+        }
 
-    .item-details {
-      display: flex;
-      flex-direction: column;
-    }
+        .item-name {
+            font-weight: 600;
+            color: #333;
+            font-size: 16px;
+            flex: 1;
+        }
 
-    .item-detail-text {
-      font-size: 1.1rem;
-      font-weight: 600;
-      color: var(--text-color);
-    }
+        .item-description {
+            color: #666;
+            font-size: 13px;
+            line-height: 1.4;
+        }
 
-    .item-price {
-      font-size: 1.1rem;
-      font-weight: 700;
-      color: var(--accent-color);
-      background-color: #eafaf1;
-      padding: 6px 12px;
-      border-radius: 20px;
-      white-space: nowrap;
-    }
-  </style>
+        .item-price {
+            font-weight: bold;
+            color: #667eea;
+            font-size: 20px;
+            min-width: 80px;
+            text-align: right;
+            margin-left: 10px;
+        }
+
+        .item-badge {
+            display: inline-block;
+            background: #ff4757;
+            color: white;
+            padding: 3px 8px;
+            border-radius: 12px;
+            font-size: 11px;
+            margin-top: 5px;
+        }
+
+        .unavailable {
+            opacity: 0.6;
+            background: #f8f9fa;
+            cursor: not-allowed;
+        }
+
+        .cart-bar {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: white;
+            padding: 15px 20px;
+            box-shadow: 0 -4px 20px rgba(0,0,0,0.15);
+            display: none;
+            z-index: 999;
+            max-width: 600px;
+            margin: 0 auto;
+            border-radius: 20px 20px 0 0;
+        }
+
+        .cart-bar.show {
+            display: block;
+        }
+
+        .cart-summary {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .cart-items-count {
+            background: #667eea;
+            color: white;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: bold;
+        }
+
+        .cart-total {
+            font-size: 20px;
+            font-weight: bold;
+            color: #333;
+        }
+
+        .cart-buttons {
+            display: flex;
+            gap: 10px;
+        }
+
+        .btn {
+            flex: 1;
+            padding: 12px;
+            border: none;
+            border-radius: 25px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .btn-view-cart {
+            background: #f0f2f5;
+            color: #333;
+        }
+
+        .btn-send-order {
+            background: #25d366;
+            color: white;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.5);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal.show {
+            display: flex;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 20px;
+            padding: 25px;
+            width: 90%;
+            max-width: 500px;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .modal-title {
+            font-size: 24px;
+            font-weight: bold;
+            color: #333;
+        }
+
+        .close-btn {
+            background: #f0f2f5;
+            border: none;
+            width: 35px;
+            height: 35px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 20px;
+        }
+
+        .cart-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 15px 0;
+            border-bottom: 1px solid #f0f2f5;
+        }
+
+        .cart-item-name {
+            font-weight: 600;
+            color: #333;
+        }
+
+        .cart-item-price {
+            color: #667eea;
+            font-weight: bold;
+        }
+
+        .quantity-controls {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-top: 5px;
+        }
+
+        .qty-btn {
+            background: #f0f2f5;
+            border: none;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        .remove-btn {
+            background: #ff4757;
+            color: white;
+            border: none;
+            padding: 8px 12px;
+            border-radius: 15px;
+            cursor: pointer;
+            font-size: 12px;
+        }
+
+        .cart-total-section {
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 2px solid #f0f2f5;
+            text-align: right;
+        }
+
+        .cart-total-value {
+            font-size: 28px;
+            font-weight: bold;
+            color: #333;
+        }
+
+        .customer-info {
+            margin-top: 20px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 10px;
+        }
+
+        .customer-info input,
+        .customer-info select {
+            width: 100%;
+            padding: 12px;
+            margin-bottom: 10px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 14px;
+        }
+
+        .customer-info label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .footer {
+            text-align: center;
+            padding: 30px 20px;
+            color: #666;
+            font-size: 13px;
+            background: white;
+            margin-top: 30px;
+        }
+
+        .whatsapp-btn {
+            position: fixed;
+            bottom: 100px;
+            right: 20px;
+            background: #25d366;
+            color: white;
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-decoration: none;
+            font-size: 30px;
+            box-shadow: 0 4px 12px rgba(37, 211, 102, 0.4);
+            z-index: 1000;
+        }
+
+        .toast {
+            position: fixed;
+            bottom: 100px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #333;
+            color: white;
+            padding: 12px 20px;
+            border-radius: 25px;
+            font-size: 14px;
+            opacity: 0;
+            transition: opacity 0.3s;
+            z-index: 1001;
+        }
+
+        .toast.show {
+            opacity: 1;
+        }
+    </style>
 </head>
 <body>
+    <div class="header">
+        <h1>🍨 Delivery de Sorvetes</h1>
+        <p>Interior de Alagoas • Entrega rápida</p>
+    </div>
 
-  <div class="container">
-    <header>
-      <h1>Nosso Cardápio</h1>
-      <p>Confira nossos produtos e preços atualizados</p>
-    </header>
+    <div class="search-bar">
+        <input type="text" id="searchInput" placeholder="Buscar sorvetes, açaí, milkshakes..." onkeyup="filterMenu()">
+    </div>
 
-    <div id="loading">Carregando cardápio...</div>
-    <main id="app"></main>
-  </div>
+    <div id="menu-container"></div>
 
-  <script>
-    // URL gerada na implantação do Google Apps Script
-    const API_URL = "https://script.google.com/macros/s/AKfycbz--MWtYgG23Kzd5q3DwocWIqpMaNRaAee27sm7hg8cRo_WFlJ-hkxRwC_nWWZlsGVp/exec";
+    <div class="footer">
+        <p>📱 Faça seu pedido pelo WhatsApp</p>
+        <p>🕐 Horário: 10h às 22h</p>
+        <p>🛵 Taxa de entrega: R$ 5,00</p>
+        <p>💳 Aceitamos: Dinheiro, Pix e Cartão</p>
+    </div>
 
-    async function loadMenu() {
-      const loadingEl = document.getElementById('loading');
-      const appEl = document.getElementById('app');
+    <div class="cart-bar" id="cartBar">
+        <div class="cart-summary">
+            <span class="cart-items-count" id="cartCount">0 itens</span>
+            <span class="cart-total" id="cartTotal">R$ 0,00</span>
+        </div>
+        <div class="cart-buttons">
+            <button class="btn btn-view-cart" onclick="openCart()">Ver Carrinho</button>
+            <button class="btn btn-send-order" onclick="sendOrder()">Enviar Pedido</button>
+        </div>
+    </div>
 
-      try {
-        const response = await fetch(API_URL);
-        const data = await response.json();
+    <div class="modal" id="cartModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <span class="modal-title">🛒 Seu Pedido</span>
+                <button class="close-btn" onclick="closeCart()">✕</button>
+            </div>
+            
+            <div id="cartItems"></div>
+            
+            <div class="cart-total-section">
+                <div class="cart-total-label">Total do Pedido</div>
+                <div class="cart-total-value" id="modalTotal">R$ 0,00</div>
+            </div>
+            
+            <div class="customer-info">
+                <h3 style="margin-bottom: 15px;">📋 Informações de Entrega</h3>
+                
+                <label for="customerName">Nome Completo:*</label>
+                <input type="text" id="customerName" placeholder="Digite seu nome completo" maxlength="100">
+                
+                <label for="customerAddress">Endereço de Entrega:*</label>
+                <input type="text" id="customerAddress" placeholder="Rua, número, bairro" maxlength="200">
+                
+                <label for="customerPhone">Telefone/WhatsApp:*</label>
+                <input type="tel" id="customerPhone" placeholder="(82) 99999-9999" 
+                       oninput="formatPhone(this)" maxlength="15">
+                
+                <label for="paymentMethod">Forma de Pagamento:*</label>
+                <select id="paymentMethod">
+                    <option value="dinheiro">💵 Dinheiro</option>
+                    <option value="pix">📱 Pix</option>
+                    <option value="cartao">💳 Cartão</option>
+                </select>
+                
+                <div style="margin-top: 10px; font-size: 12px; color: #666;">
+                    * Campos obrigatórios
+                </div>
+            </div>
+            
+            <button class="btn btn-send-order" style="width: 100%; margin-top: 20px; background: #25d366; color: white;" onclick="sendOrder()">
+                📤 Enviar Pedido pelo WhatsApp
+            </button>
+        </div>
+    </div>
 
-        loadingEl.style.display = 'none';
+    <a href="https://wa.me/5582996935253" class="whatsapp-btn" target="_blank">💬</a>
 
-        if (data.status === 'error') {
-          appEl.innerHTML = `<p style="text-align:center; color:red;">${data.message}</p>`;
-          return;
+    <div class="toast" id="toast">Item adicionado ao carrinho!</div>
+
+    <script>
+        const menuData = [
+            { categoria: "🍦 Sorvetes", produto: "Pote 500ml - Chocolate", descricao: "Chocolate belga com pedaços de cacau", preco: 25.00, disponivel: true },
+            { categoria: "🍦 Sorvetes", produto: "Pote 500ml - Morango", descricao: "Morango fresco da região de Alagoas", preco: 25.00, disponivel: true },
+            { categoria: "🍦 Sorvetes", produto: "Pote 500ml - Flocos", descricao: "Chocolate com flocos crocantes", preco: 25.00, disponivel: true },
+            { categoria: "🍦 Sorvetes", produto: "Pote 1L - Chocolate", descricao: "Chocolate belga com pedaços de cacau", preco: 45.00, disponivel: true },
+            { categoria: "🍦 Sorvetes", produto: "Pote 1L - Morango", descricao: "Morango fresco da região de Alagoas", preco: 45.00, disponivel: false },
+            { categoria: "🫐 Açaí", produto: "Açaí 500ml", descricao: "Açaí puro com granola e banana", preco: 20.00, disponivel: true },
+            { categoria: "🫐 Açaí", produto: "Açaí 1L", descricao: "Açaí puro com granola, banana e leite condensado", preco: 35.00, disponivel: true },
+            { categoria: "🥤 Milkshakes", produto: "Milkshake 400ml - Ovomaltine", descricao: "Com chantilly e calda de chocolate", preco: 18.00, disponivel: true },
+            { categoria: "🥤 Milkshakes", produto: "Milkshake 400ml - Morango", descricao: "Com chantilly e morangos frescos", preco: 18.00, disponivel: true },
+        ];
+
+        let cart = [];
+        let isSendingOrder = false;
+
+        function renderMenu(data) {
+            const container = document.getElementById('menu-container');
+            const categories = {};
+            
+            data.forEach(item => {
+                if (!categories[item.categoria]) {
+                    categories[item.categoria] = [];
+                }
+                categories[item.categoria].push(item);
+            });
+            
+            let html = '';
+            
+            Object.keys(categories).forEach(categoria => {
+                html += `<div class="category"><div class="category-title">${categoria}</div>`;
+                
+                categories[categoria].forEach(item => {
+                    const unavailableClass = !item.disponivel ? 'unavailable' : '';
+                    const badgeHTML = !item.disponivel ? '<span class="item-badge">Esgotado</span>' : '';
+                    
+                    html += `
+                        <div class="item ${unavailableClass}" onclick="${item.disponivel ? `addToCart('${item.produto}', ${item.preco})` : ''}">
+                            <div class="item-header">
+                                <div class="item-name">${item.produto} ${badgeHTML}</div>
+                                <div class="item-price">R$ ${item.preco.toFixed(2)}</div>
+                            </div>
+                            <div class="item-description">${item.descricao}</div>
+                            ${item.disponivel ? '<div style="color: #667eea; font-size: 12px; margin-top: 5px;">👆 Clique para adicionar</div>' : ''}
+                        </div>
+                    `;
+                });
+                
+                html += '</div>';
+            });
+            
+            container.innerHTML = html;
         }
 
-        // Agrupar itens por Categoria
-        const groupedData = data.reduce((acc, item) => {
-          const cat = item.categoria || 'OUTROS';
-          if (!acc[cat]) acc[cat] = [];
-          acc[cat].push(item);
-          return acc;
-        }, {});
-
-        // Renderizar Categorias e Cards
-        for (const [categoria, items] of Object.entries(groupedData)) {
-          const section = document.createElement('section');
-          section.className = 'category-section';
-
-          const title = document.createElement('h2');
-          title.className = 'category-title';
-          title.textContent = categoria;
-          section.appendChild(title);
-
-          const grid = document.createElement('div');
-          grid.className = 'menu-grid';
-
-          items.forEach(item => {
-            const card = document.createElement('div');
-            card.className = 'menu-card';
-
-            const detailText = item.detalhamento && item.detalhamento !== '—' 
-              ? item.detalhamento 
-              : categoria;
-
-            // Formatação do Preço
-            let formattedPrice = item.preco;
-            if (typeof item.preco === 'number') {
-              formattedPrice = item.preco.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+        function filterMenu() {
+            const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+            
+            if (searchTerm === '') {
+                renderMenu(menuData);
+                return;
             }
-
-            card.innerHTML = `
-              <div class="item-details">
-                <span class="item-detail-text">${detailText}</span>
-              </div>
-              <div class="item-price">${formattedPrice}</div>
-            `;
-
-            grid.appendChild(card);
-          });
-
-          section.appendChild(grid);
-          appEl.appendChild(section);
+            
+            const filteredData = menuData.filter(item => 
+                item.produto.toLowerCase().includes(searchTerm) ||
+                item.descricao.toLowerCase().includes(searchTerm) ||
+                item.categoria.toLowerCase().includes(searchTerm)
+            );
+            
+            renderMenu(filteredData);
         }
 
-      } catch (error) {
-        console.error("Erro ao carregar cardápio:", error);
-        loadingEl.innerHTML = "<p style='color:red;'>Erro ao carregar o cardápio. Verifique a URL do Script.</p>";
-      }
-    }
+        function addToCart(produto, preco) {
+            const existingItem = cart.find(item => item.produto === produto);
+            
+            if (existingItem) {
+                existingItem.quantidade++;
+            } else {
+                cart.push({ produto, preco, quantidade: 1 });
+            }
+            
+            updateCartDisplay();
+            
+            const toast = document.getElementById('toast');
+            toast.textContent = `${produto} adicionado! 🛒`;
+            toast.classList.add('show');
+            
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 2000);
+        }
 
-    loadMenu();
-  </script>
+        function updateCartDisplay() {
+            const cartBar = document.getElementById('cartBar');
+            const cartCount = document.getElementById('cartCount');
+            const cartTotal = document.getElementById('cartTotal');
+            
+            const totalItems = cart.reduce((sum, item) => sum + item.quantidade, 0);
+            const totalPrice = cart.reduce((sum, item) => sum + (item.preco * item.quantidade), 0);
+            
+            if (totalItems > 0) {
+                cartBar.classList.add('show');
+                cartCount.textContent = `${totalItems} ${totalItems === 1 ? 'item' : 'itens'}`;
+                cartTotal.textContent = `R$ ${totalPrice.toFixed(2)}`;
+            } else {
+                cartBar.classList.remove('show');
+            }
+        }
+
+        function formatPhone(input) {
+            let value = input.value.replace(/\D/g, '');
+            
+            if (value.length > 11) {
+                value = value.substring(0, 11);
+            }
+            
+            if (value.length > 0) {
+                value = `(${value.substring(0, 2)}) ${value.substring(2, 7)}-${value.substring(7)}`;
+            }
+            
+            input.value = value;
+        }
+
+        function openCart() {
+            const modal = document.getElementById('cartModal');
+            const cartItems = document.getElementById('cartItems');
+            const modalTotal = document.getElementById('modalTotal');
+            
+            if (cart.length === 0) {
+                alert('Seu carrinho está vazio!');
+                return;
+            }
+            
+            let html = '';
+            let total = 0;
+            
+            cart.forEach((item, index) => {
+                total += item.preco * item.quantidade;
+                
+                html += `
+                    <div class="cart-item">
+                        <div>
+                            <div class="cart-item-name">${item.produto}</div>
+                            <div class="cart-item-price">R$ ${(item.preco * item.quantidade).toFixed(2)}</div>
+                            <div class="quantity-controls">
+                                <button class="qty-btn" onclick="decreaseQuantity(${index})">-</button>
+                                <span>${item.quantidade}</span>
+                                <button class="qty-btn" onclick="increaseQuantity(${index})">+</button>
+                                <button class="remove-btn" onclick="removeItem(${index})">Remover</button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+            
+            cartItems.innerHTML = html;
+            modalTotal.textContent = `R$ ${total.toFixed(2)}`;
+            modal.classList.add('show');
+        }
+
+        function closeCart() {
+            document.getElementById('cartModal').classList.remove('show');
+        }
+
+        function increaseQuantity(index) {
+            cart[index].quantidade++;
+            updateCartDisplay();
+            openCart();
+        }
+
+        function decreaseQuantity(index) {
+            if (cart[index].quantidade > 1) {
+                cart[index].quantidade--;
+            } else {
+                cart.splice(index, 1);
+            }
+            updateCartDisplay();
+            openCart();
+        }
+
+        function removeItem(index) {
+            cart.splice(index, 1);
+            updateCartDisplay();
+            
+            if (cart.length === 0) {
+                closeCart();
+            } else {
+                openCart();
+            }
+        }
+
+        function sendOrder() {
+            if (isSendingOrder) {
+                alert('⚠️ Aguarde um momento antes de enviar outro pedido!');
+                return;
+            }
+            
+            if (cart.length === 0) {
+                alert('⚠️ Seu carrinho está vazio!');
+                return;
+            }
+            
+            const name = document.getElementById('customerName').value.trim();
+            const address = document.getElementById('customerAddress').value.trim();
+            const phone = document.getElementById('customerPhone').value.trim();
+            const payment = document.getElementById('paymentMethod').value;
+            
+            if (!name || name.length < 3) {
+                alert('⚠️ Por favor, digite seu nome completo!');
+                return;
+            }
+            
+            if (!address || address.length < 10) {
+                alert('⚠️ Por favor, digite o endereço completo!');
+                return;
+            }
+            
+            const phoneRegex = /^\(?[1-9]{2}\)? ?(?:[2-8]|9[1-9])[0-9]{3}[\- ]?[0-9]{4}$/;
+            if (!phone || !phoneRegex.test(phone)) {
+                alert('⚠️ Por favor, digite um telefone válido!\nExemplo: (82) 99999-9999');
+                return;
+            }
+            
+            const totalItems = cart.reduce((sum, item) => sum + item.quantidade, 0);
+            if (totalItems > 50) {
+                alert('⚠️ Quantidade máxima de 50 itens por pedido!');
+                return;
+            }
+            
+            let orderMessage = `🍨 *NOVO PEDIDO - DELIVERY DE SORVETES* 🍨\n\n`;
+            orderMessage += `📅 *Data:* ${new Date().toLocaleDateString('pt-BR')}\n`;
+            orderMessage += `🕐 *Hora:* ${new Date().toLocaleTimeString('pt-BR')}\n\n`;
+            orderMessage += `👤 *Cliente:* ${name}\n`;
+            orderMessage += `📱 *Telefone:* ${phone}\n`;
+            orderMessage += `📍 *Endereço:* ${address}\n`;
+            orderMessage += `💳 *Pagamento:* ${payment}\n\n`;
+            orderMessage += `📋 *ITENS DO PEDIDO:*\n\n`;
+            
+            let total = 0;
+            cart.forEach((item, index) => {
+                const subtotal = item.preco * item.quantidade;
+                total += subtotal;
+                orderMessage += `${index + 1}. ${item.produto}\n`;
+                orderMessage += `   ${item.quantidade}x R$ ${item.preco.toFixed(2)} = R$ ${subtotal.toFixed(2)}\n\n`;
+            });
+            
+            orderMessage += `💰 *TOTAL: R$ ${total.toFixed(2)}*\n`;
+            orderMessage += `🛵 *Taxa de entrega: R$ 5,00*\n`;
+            orderMessage += `💵 *TOTAL FINAL: R$ ${(total + 5).toFixed(2)}*\n\n`;
+            orderMessage += `✅ *Pedido enviado pelo cardápio digital*`;
+            
+            const whatsappNumber = '5582996935253';
+            const whatsappUrl = `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(orderMessage)}`;
+            
+            if (confirm('Confirma o envio deste pedido?')) {
+                isSendingOrder = true;
+                window.open(whatsappUrl, '_blank');
+                
+                cart = [];
+                updateCartDisplay();
+                closeCart();
+                
+                document.getElementById('customerName').value = '';
+                document.getElementById('customerAddress').value = '';
+                document.getElementById('customerPhone').value = '';
+                
+                setTimeout(() => {
+                    isSendingOrder = false;
+                }, 3000);
+            }
+        }
+
+        renderMenu(menuData);
+        updateCartDisplay();
+    </script>
 </body>
 </html>
