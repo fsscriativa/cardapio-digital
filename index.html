@@ -488,7 +488,6 @@
     <div class="toast" id="toast">Item adicionado ao carrinho!</div>
 
     <script>
-        // INSIRA AQUI A URL GERADA NA IMPLANTAÇÃO DO GOOGLE APPS SCRIPT
         const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbzvJ6V5H3oqtYXbO90i86bVIST6sfZh2KKI2K-M2iIhuxRjxu5KOyxlMxgiI22WWt7W/exec';
         const WHATSAPP_NUMBER = '5582996935253';
         const TAXA_ENTREGA = 3.00;
@@ -499,14 +498,16 @@
 
         async function fetchProducts() {
             try {
-                const response = await fetch(WEB_APP_URL);
+                // Adicionamos redirect: 'follow' para o fetch tratar os redirecionamentos do Google
+                const response = await fetch(WEB_APP_URL, { redirect: 'follow' });
                 menuData = await response.json();
                 renderMenu(menuData);
             } catch (error) {
                 console.error("Erro ao carregar cardápio:", error);
                 document.getElementById('menu-container').innerHTML = `
                     <div style="text-align: center; padding: 20px; color: #ff4757;">
-                        Não foi possível carregar o cardápio. Recarregue a página.
+                        Não foi possível carregar o cardápio. Recarregue a página.<br>
+                        <small style="color:#666; display:block; margin-top:8px;">Verifique o console do navegador para mais detalhes.</small>
                     </div>`;
             }
         }
@@ -725,7 +726,6 @@
             toggleButtons(true, "Processando pedido...");
 
             try {
-                // 1. Envia requisição para atualizar o estoque na planilha
                 const response = await fetch(WEB_APP_URL, {
                     method: 'POST',
                     headers: { 'Content-Type': 'text/plain' },
@@ -737,13 +737,12 @@
                 if (result.status === 'stock_error' || result.status === 'error') {
                     alert(`⚠️ Ocorreu um problema:
 ${result.message}`);
-                    fetchProducts(); // Atualiza a lista com o estoque real
+                    fetchProducts();
                     isSendingOrder = false;
                     toggleButtons(false, "Enviar Pedido pelo WhatsApp");
                     return;
                 }
 
-                // 2. Se o estoque foi atualizado com sucesso, prepara a mensagem do WhatsApp
                 let orderMessage = `🍨 *NOVO PEDIDO - DELIVERY DE SORVETES* 🍨
 
 `;
@@ -791,7 +790,6 @@ ${result.message}`);
                 
                 window.open(whatsappUrl, '_blank');
                 
-                // Reseta a interface
                 cart = [];
                 updateCartDisplay();
                 closeCart();
@@ -799,7 +797,6 @@ ${result.message}`);
                 document.getElementById('customerAddress').value = '';
                 document.getElementById('customerPhone').value = '';
                 
-                // Atualiza a vitrine de produtos com o estoque renovado
                 await fetchProducts();
 
             } catch (err) {
@@ -819,7 +816,6 @@ ${result.message}`);
             btnModal.textContent = disabled ? text : "📤 Enviar Pedido pelo WhatsApp";
         }
 
-        // Inicializa buscando os dados da planilha
         fetchProducts();
     </script>
 </body>
