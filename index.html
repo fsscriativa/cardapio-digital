@@ -46,6 +46,9 @@
         .form-group input, .form-group select { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 8px; font-size: 14px; }
 
         .loading { text-align: center; padding: 40px; color: #666; font-size: 16px; }
+        .summary-box { background: #f8f9fa; padding: 10px; border-radius: 8px; margin: 10px 0; font-size: 14px; }
+        .summary-line { display: flex; justify-content: space-between; margin-bottom: 5px; }
+        .summary-total { font-weight: bold; font-size: 16px; color: #222; border-top: 1px solid #ddd; padding-top: 5px; }
     </style>
 </head>
 <body>
@@ -56,7 +59,7 @@
     </div>
 
     <div class="search-bar">
-        <input type="text" id="searchInput" placeholder="🔍 Buscar sabore ou produto..." onkeyup="filterMenu()">
+        <input type="text" id="searchInput" placeholder="🔍 Buscar sabor ou produto..." onkeyup="filterMenu()">
     </div>
 
     <div id="menu-container">
@@ -79,7 +82,21 @@
             </div>
             
             <div id="cartItems"></div>
-            <hr style="margin: 15px 0; border: 0; border-top: 1px solid #eee;">
+            
+            <div class="summary-box">
+                <div class="summary-line">
+                    <span>Subtotal:</span>
+                    <span id="subtotalVal">R$ 0,00</span>
+                </div>
+                <div class="summary-line">
+                    <span>Taxa de Entrega:</span>
+                    <span>R$ 3,00</span>
+                </div>
+                <div class="summary-line summary-total">
+                    <span>Total Final:</span>
+                    <span id="finalTotalVal">R$ 0,00</span>
+                </div>
+            </div>
 
             <div class="form-group">
                 <label>Nome Completo:</label>
@@ -103,8 +120,9 @@
     </div>
 
     <script>
-        const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbxCXtjbCBiJGQE8K6_tW5Ez4MDqoS1j4P1nmFjwiT6xa-Q7rRqCWrkrhsd1jeEfYK0c/exec';
+        const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbzvJ6V5H3oqtYXbO90i86bVIST6sfZh2KKI2K-M2iIhuxRjxu5KOyxlMxgiI22WWt7W/exec';
         const PHONE_NUMBER = '5582996935253';
+        const DELIVERY_FEE = 3.00; // Taxa de entrega fixa
 
         let menuData = [];
         let cart = [];
@@ -174,11 +192,15 @@
 
         function updateCart() {
             const totalItems = cart.reduce((sum, i) => sum + i.quantidade, 0);
-            const totalPrice = cart.reduce((sum, i) => sum + (i.preco * i.quantidade), 0);
+            const subtotal = cart.reduce((sum, i) => sum + (i.preco * i.quantidade), 0);
+            const totalWithDelivery = totalItems > 0 ? subtotal + DELIVERY_FEE : 0;
             
             document.getElementById('cartCount').textContent = `${totalItems} ${totalItems === 1 ? 'item' : 'itens'}`;
-            document.getElementById('cartTotal').textContent = `R$ ${totalPrice.toFixed(2)}`;
+            document.getElementById('cartTotal').textContent = `R$ ${totalWithDelivery.toFixed(2)}`;
             document.getElementById('cartBar').classList.toggle('show', totalItems > 0);
+            
+            document.getElementById('subtotalVal').textContent = `R$ ${subtotal.toFixed(2)}`;
+            document.getElementById('finalTotalVal').textContent = `R$ ${totalWithDelivery.toFixed(2)}`;
         }
 
         function openCart() {
@@ -229,7 +251,7 @@
             btn.textContent = 'Processando...';
 
             try {
-                // Dá baixa no estoque do Google Sheets
+                // Dá baixa no estoque no Google Sheets
                 const res = await fetch(WEB_APP_URL, {
                     method: 'POST',
                     body: JSON.stringify({ items: cart })
@@ -244,14 +266,25 @@
                     return;
                 }
 
-                // Monta texto do WhatsApp
-                let text = `🍨 *NOVO PEDIDO* 🍨\n\n👤 *Cliente:* ${name}\n📍 *Endereço:* ${address}\n💳 *Pagamento:* ${payment}\n\n📋 *Itens:*\n`;
-                let total = 0;
+                // Cálculo dos totais para o WhatsApp
+                let subtotal = 0;
+                let itemsList = '';
                 cart.forEach(i => {
-                    text += `• ${i.quantidade}x ${i.produto} (R$ ${(i.preco * i.quantidade).toFixed(2)})\n`;
-                    total += i.preco * i.quantidade;
+                    const itemTotal = i.preco * i.quantidade;
+                    subtotal += itemTotal;
+                    itemsList += `• ${i.quantidade}x ${i.produto} (R$ ${itemTotal.toFixed(2)})\n`;
                 });
-                text += `\n💰 *Total:* R$ ${total.toFixed(2)}`;
+                const grandTotal = subtotal + DELIVERY_FEE;
+
+                // Mensagem formatada
+                let text = `🍨 *NOVO PEDIDO* 🍨\n\n`;
+                text += `👤 *Cliente:* ${name}\n`;
+                text += `📍 *Endereço:* ${address}\n`;
+                text += `💳 *Pagamento:* ${payment}\n\n`;
+                text += `📋 *Itens:*\n${itemsList}\n`;
+                text += `🛍️ *Subtotal:* R$ ${subtotal.toFixed(2)}\n`;
+                text += `🛵 *Taxa de Entrega:* R$ ${DELIVERY_FEE.toFixed(2)}\n`;
+                text += `💰 *Total Geral:* R$ ${grandTotal.toFixed(2)}`;
 
                 window.open(`https://wa.me/${PHONE_NUMBER}?text=${encodeURIComponent(text)}`, '_blank');
 
