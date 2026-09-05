@@ -121,7 +121,7 @@
 
     <script>
         // URL da sua API do Apps Script
-        const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbzvJ6V5H3oqtYXbO90i86bVIST6sfZh2KKI2K-M2iIhuxRjxu5KOyxlMxgiI22WWt7W/exec';
+        const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbxCXtjbCBiJGQE8K6_tW5Ez4MDqoS1j4P1nmFjwiT6xa-Q7rRqCWrkrhsd1jeEfYK0c/exec';
         const PHONE_NUMBER = '5582996935253';
         const DELIVERY_FEE = 3.00; // Taxa fixa de entrega
 
@@ -129,17 +129,34 @@
         let cart = [];
 
         async function fetchProducts() {
-            try {
-                const res = await fetch(WEB_APP_URL, { redirect: 'follow' });
-                menuData = await res.json();
-                renderMenu(menuData);
-            } catch (err) {
-                document.getElementById('menu-container').innerHTML = `
-                    <div style="text-align:center; padding:30px; color:#ff4757;">
-                        Não foi possível carregar o cardápio. Recarregue a página.
-                    </div>`;
+    try {
+        // Adicionada configuração para tratar o redirecionamento do Google Apps Script
+        const res = await fetch(WEB_APP_URL + '?action=read', { 
+            method: 'GET',
+            redirect: 'follow',
+            headers: {
+                'Content-Type': 'text/plain;charset=utf-8'
             }
+        });
+        
+        if (!res.ok) throw new Error('Falha na resposta da rede');
+        
+        menuData = await res.json();
+        
+        if (typeof menuData === 'string') {
+            menuData = JSON.parse(menuData);
         }
+        
+        renderMenu(menuData);
+    } catch (err) {
+        console.error('Erro na requisição:', err);
+        document.getElementById('menu-container').innerHTML = `
+            <div style="text-align:center; padding:30px; color:#ff4757;">
+                Não foi possível carregar o cardápio. Recarregue a página.<br>
+                <small style="color:#888;">Detalhe: ${err.message}</small>
+            </div>`;
+    }
+}
 
         function renderMenu(data) {
             const container = document.getElementById('menu-container');
