@@ -46,9 +46,9 @@
         .form-group input, .form-group select { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 8px; font-size: 14px; }
 
         .loading { text-align: center; padding: 40px; color: #666; font-size: 16px; }
-        .summary-box { background: #f8f9fa; padding: 10px; border-radius: 8px; margin: 10px 0; font-size: 14px; }
-        .summary-line { display: flex; justify-content: space-between; margin-bottom: 5px; }
-        .summary-total { font-weight: bold; font-size: 16px; color: #222; border-top: 1px solid #ddd; padding-top: 5px; }
+        .summary-box { background: #f8f9fa; padding: 12px; border-radius: 8px; margin: 15px 0; font-size: 14px; border: 1px solid #eee; }
+        .summary-line { display: flex; justify-content: space-between; margin-bottom: 6px; }
+        .summary-total { font-weight: bold; font-size: 16px; color: #222; border-top: 1px solid #ddd; padding-top: 6px; margin-top: 6px; }
     </style>
 </head>
 <body>
@@ -120,9 +120,10 @@
     </div>
 
     <script>
-        const WEB_APP_URL = ' https://script.google.com/macros/s/AKfycbyAvl2hoD1v7P1-hgOqd9rA1yxv1cfeG6WiJIfGKI55ZCLvWcDVx80KZNf0_Z1pzUKO/exec  ';
+        // URL da sua API do Apps Script
+        const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbzvJ6V5H3oqtYXbO90i86bVIST6sfZh2KKI2K-M2iIhuxRjxu5KOyxlMxgiI22WWt7W/exec';
         const PHONE_NUMBER = '5582996935253';
-        const DELIVERY_FEE = 3.00; // Taxa de entrega fixa
+        const DELIVERY_FEE = 3.00; // Taxa fixa de entrega
 
         let menuData = [];
         let cart = [];
@@ -162,7 +163,7 @@
                         <div class="item ${!active ? 'unavailable' : ''}" onclick="${active ? `addToCart('${item.produto}', ${item.preco}, ${item.estoque})` : ''}">
                             <div class="item-header">
                                 <span>${item.produto}</span>
-                                <span class="item-price">R$ ${item.preco.toFixed(2)}</span>
+                                <span class="item-price">R$ ${Number(item.preco).toFixed(2)}</span>
                             </div>
                             <div class="item-description">${item.descricao}</div>
                             <div class="item-footer">
@@ -185,7 +186,7 @@
                 }
                 item.quantidade++;
             } else {
-                cart.push({ produto, preco, quantidade: 1, estoqueMax: estoque });
+                cart.push({ produto, preco: Number(preco), quantidade: 1, estoqueMax: estoque });
             }
             updateCart();
         }
@@ -266,7 +267,7 @@
                     return;
                 }
 
-                // Cálculo dos totais para o WhatsApp
+                // Cálculo dos totais para a mensagem do WhatsApp
                 let subtotal = 0;
                 let itemsList = '';
                 cart.forEach(i => {
