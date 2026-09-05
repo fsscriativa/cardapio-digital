@@ -124,33 +124,29 @@
     </div>
 
     <script>
-        const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbzvJ6V5H3oqtYXbO90i86bVIST6sfZh2KKI2K-M2iIhuxRjxu5KOyxlMxgiI22WWt7W/exec';
+        const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbxCXtjbCBiJGQE8K6_tW5Ez4MDqoS1j4P1nmFjwiT6xa-Q7rRqCWrkrhsd1jeEfYK0c/exec';
         const PHONE_NUMBER = '5582996935253';
         const DELIVERY_FEE = 3.00;
 
         let menuData = [];
         let cart = [];
 
-        async function fetchProducts() {
-            try {
-                const res = await fetch(WEB_APP_URL + '?action=read', { 
-                    method: 'GET',
-                    redirect: 'follow',
-                    headers: { 'Content-Type': 'text/plain;charset=utf-8' }
-                });
-                
-                if (!res.ok) throw new Error('Falha na rede');
-                
-                menuData = await res.json();
-                if (typeof menuData === 'string') menuData = JSON.parse(menuData);
-                
-                renderMenu(menuData);
-            } catch (err) {
+        // Carregamento via JSONP (Sem travamentos de CORS)
+        function fetchProducts() {
+            const script = document.createElement('script');
+            script.src = `${WEB_APP_URL}?callback=handleResponse`;
+            script.onerror = function() {
                 document.getElementById('menu-container').innerHTML = `
                     <div style="text-align:center; padding:30px; color:#ff4757;">
                         Não foi possível carregar o cardápio. Recarregue a página.
                     </div>`;
-            }
+            };
+            document.body.appendChild(script);
+        }
+
+        function handleResponse(data) {
+            menuData = data;
+            renderMenu(menuData);
         }
 
         function renderMenu(data) {
@@ -265,19 +261,13 @@
             btn.textContent = 'Processando...';
 
             try {
-                const res = await fetch(WEB_APP_URL, {
+                // Atualiza estoque via POST
+                await fetch(WEB_APP_URL, {
                     method: 'POST',
+                    mode: 'no-cors',
+                    headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ items: cart })
                 });
-                const result = await res.json();
-
-                if(result.status === 'stock_error') {
-                    alert(result.message);
-                    fetchProducts();
-                    btn.disabled = false;
-                    btn.textContent = '📤 Confirmar e Enviar Pedido';
-                    return;
-                }
 
                 let subtotal = 0;
                 let itemsList = '';
@@ -303,7 +293,7 @@
                 cart = [];
                 updateCart();
                 closeCart();
-                fetchProducts();
+                setTimeout(fetchProducts, 1500);
 
             } catch(err) {
                 alert('Erro ao enviar pedido. Tente novamente.');
