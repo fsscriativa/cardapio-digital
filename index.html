@@ -103,6 +103,10 @@
                 <input type="text" id="custName" placeholder="Seu nome">
             </div>
             <div class="form-group">
+                <label>Telefone / WhatsApp:</label>
+                <input type="tel" id="custPhone" placeholder="(82) 99999-9999">
+            </div>
+            <div class="form-group">
                 <label>Endereço de Entrega:</label>
                 <input type="text" id="custAddress" placeholder="Rua, número e bairro">
             </div>
@@ -120,43 +124,34 @@
     </div>
 
     <script>
-        // URL da sua API do Apps Script
-        const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbxCXtjbCBiJGQE8K6_tW5Ez4MDqoS1j4P1nmFjwiT6xa-Q7rRqCWrkrhsd1jeEfYK0c/exec';
+        const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbzvJ6V5H3oqtYXbO90i86bVIST6sfZh2KKI2K-M2iIhuxRjxu5KOyxlMxgiI22WWt7W/exec';
         const PHONE_NUMBER = '5582996935253';
-        const DELIVERY_FEE = 3.00; // Taxa fixa de entrega
+        const DELIVERY_FEE = 3.00;
 
         let menuData = [];
         let cart = [];
 
         async function fetchProducts() {
-    try {
-        // Adicionada configuração para tratar o redirecionamento do Google Apps Script
-        const res = await fetch(WEB_APP_URL + '?action=read', { 
-            method: 'GET',
-            redirect: 'follow',
-            headers: {
-                'Content-Type': 'text/plain;charset=utf-8'
+            try {
+                const res = await fetch(WEB_APP_URL + '?action=read', { 
+                    method: 'GET',
+                    redirect: 'follow',
+                    headers: { 'Content-Type': 'text/plain;charset=utf-8' }
+                });
+                
+                if (!res.ok) throw new Error('Falha na rede');
+                
+                menuData = await res.json();
+                if (typeof menuData === 'string') menuData = JSON.parse(menuData);
+                
+                renderMenu(menuData);
+            } catch (err) {
+                document.getElementById('menu-container').innerHTML = `
+                    <div style="text-align:center; padding:30px; color:#ff4757;">
+                        Não foi possível carregar o cardápio. Recarregue a página.
+                    </div>`;
             }
-        });
-        
-        if (!res.ok) throw new Error('Falha na resposta da rede');
-        
-        menuData = await res.json();
-        
-        if (typeof menuData === 'string') {
-            menuData = JSON.parse(menuData);
         }
-        
-        renderMenu(menuData);
-    } catch (err) {
-        console.error('Erro na requisição:', err);
-        document.getElementById('menu-container').innerHTML = `
-            <div style="text-align:center; padding:30px; color:#ff4757;">
-                Não foi possível carregar o cardápio. Recarregue a página.<br>
-                <small style="color:#888;">Detalhe: ${err.message}</small>
-            </div>`;
-    }
-}
 
         function renderMenu(data) {
             const container = document.getElementById('menu-container');
@@ -256,11 +251,12 @@
 
         async function sendOrder() {
             const name = document.getElementById('custName').value.trim();
+            const phone = document.getElementById('custPhone').value.trim();
             const address = document.getElementById('custAddress').value.trim();
             const payment = document.getElementById('custPayment').value;
 
-            if(!name || !address) {
-                alert('Preencha seu nome e endereço.');
+            if(!name || !phone || !address) {
+                alert('Preencha seu nome, telefone e endereço.');
                 return;
             }
 
@@ -269,7 +265,6 @@
             btn.textContent = 'Processando...';
 
             try {
-                // Dá baixa no estoque no Google Sheets
                 const res = await fetch(WEB_APP_URL, {
                     method: 'POST',
                     body: JSON.stringify({ items: cart })
@@ -284,7 +279,6 @@
                     return;
                 }
 
-                // Cálculo dos totais para a mensagem do WhatsApp
                 let subtotal = 0;
                 let itemsList = '';
                 cart.forEach(i => {
@@ -294,9 +288,9 @@
                 });
                 const grandTotal = subtotal + DELIVERY_FEE;
 
-                // Mensagem formatada
                 let text = `🍨 *NOVO PEDIDO* 🍨\n\n`;
                 text += `👤 *Cliente:* ${name}\n`;
+                text += `📱 *Telefone:* ${phone}\n`;
                 text += `📍 *Endereço:* ${address}\n`;
                 text += `💳 *Pagamento:* ${payment}\n\n`;
                 text += `📋 *Itens:*\n${itemsList}\n`;
